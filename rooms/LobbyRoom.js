@@ -1,55 +1,36 @@
-const { Room } = require("colyseus");
-const SmashRoom = require("./SmashRoom");
+const colyseus = require("colyseus");
 
-class LobbyRoom extends Room {
+class LobbyRoom extends colyseus.Room {
   onCreate(options) {
-    console.log("LobbyRoom created");
-    this.clientsWaiting = [];
-  }
+    this.setState({ players: {} });
 
-  onJoin(client, options) {
-    console.log(`${client.sessionId} joined LobbyRoom`);
-    this.clientsWaiting.push(client);
+    this.onMessage("join", (client, message) => {
+      this.state.players[client.sessionId] = { name: message.name, team: 0 };
+      this.broadcast("players", this.state.players);
+    });
 
-    // Check for available matches
-    this.checkMatches();
-  }
-
-  onLeave(client, consented) {
-    console.log(`${client.sessionId} left LobbyRoom`);
-    this.clientsWaiting = this.clientsWaiting.filter(c => c !== client);
-  }
-
-  checkMatches() {
-    while (this.clientsWaiting.length >= 2) {
-      // Example: 2v2 if 4 clients waiting
-      let teamAssignments = [];
-      let matchClients = [];
-
-      if (this.clientsWaiting.length >= 4) {
-        matchClients = this.clientsWaiting.splice(0, 4);
-        teamAssignments = [1, 1, 2, 2]; // two teams
-      } else {
-        matchClients = this.clientsWaiting.splice(0, 2);
-        teamAssignments = [1, 2]; // 1v1
+    // Automatically create SmashRoom when enough players join
+    this.onMessage("ready", (client) => {
+      const readyPlayers = Object.keys(this.state.players);
+      if (readyPlayers.length >= 2) {
+        const smashRoom = this.simulateSmashRoom(readyPlayers);
+        smashRoom.start();
       }
-
-      // Create a new SmashRoom
-      const roomName = `smash_${Date.now()}`;
-      const room = this.createRoom(roomName, matchClients, teamAssignments);
-    }
+    });
   }
 
-  async createRoom(name, clients, teams) {
-    const smashRoom = await this.presence.createRoom("smash", {
-      maxClients: clients.length
-    });
+  simulateSmashRoom(playerIds) {
+    // placeholder for matchmaking logic
+    return { start: () => console.log("SmashRoom started with players:", playerIds) };
+  }
 
-    clients.forEach((client, index) => {
-      smashRoom.onJoin(client, { team: teams[index] });
-    });
+  onJoin(client) {
+    console.log(client.sessionId, "joined LobbyRoom");
+  }
 
-    console.log(`Created SmashRoom ${name} with ${clients.length} players`);
+  onLeave(client) {
+    delete this.state.players[client.sessionId];
+    this.broadcast("players", this.state.players);
   }
 }
 

@@ -1,34 +1,31 @@
-const { Room } = require("colyseus");
+const colyseus = require("colyseus");
 
-class SmashRoom extends Room {
+class SmashRoom extends colyseus.Room {
   onCreate(options) {
-    console.log("SmashRoom created", options);
-
-    this.setState({
-      players: {}
-    });
+    this.setState({ players: {} });
 
     this.onMessage("move", (client, message) => {
-      // Update player position
-      if (this.state.players[client.sessionId]) {
-        this.state.players[client.sessionId] = message;
-        this.broadcast("state", this.state);
-      }
+      if (!this.state.players[client.sessionId]) return;
+      this.state.players[client.sessionId].x = message.x;
+      this.state.players[client.sessionId].y = message.y;
+      this.broadcast("move", { id: client.sessionId, x: message.x, y: message.y });
+    });
+
+    this.onMessage("attack", (client, message) => {
+      if (!this.state.players[client.sessionId]) return;
+      this.broadcast("attack", { id: client.sessionId, attack: message.attack });
     });
   }
 
-  onJoin(client, options) {
-    console.log(`${client.sessionId} joined SmashRoom`);
-    this.state.players[client.sessionId] = { x: 0, y: 0, team: options.team || 1 };
+  onJoin(client) {
+    this.state.players[client.sessionId] = { x: 0, y: 0, hp: 100 };
+    this.broadcast("players", this.state.players);
+    console.log(client.sessionId, "joined SmashRoom");
   }
 
-  onLeave(client, consented) {
-    console.log(`${client.sessionId} left SmashRoom`);
+  onLeave(client) {
     delete this.state.players[client.sessionId];
-  }
-
-  onDispose() {
-    console.log("SmashRoom disposed");
+    this.broadcast("players", this.state.players);
   }
 }
 
