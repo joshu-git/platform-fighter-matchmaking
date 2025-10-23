@@ -1,0 +1,25 @@
+{
+  "name": "platform-fighter-matchmaking",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshu-git/platform-fighter-matchmaking.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/joshu-git/platform-fighter-matchmaking/issues"
+  },
+  "homepage": "https://github.com/joshu-git/platform-fighter-matchmaking#readme",
+  "dependencies": {
+    "@colyseus/uwebsockets-transport": "^0.16.10",
+    "colyseus": "^0.16.5"
+  }
+}
