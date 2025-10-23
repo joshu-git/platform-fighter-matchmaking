@@ -1,15 +1,16 @@
 {
-  "name": "smash-multiplayer-server",
+  "name": "platform-fighter-matchmaking",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "colyseus": "^0.18.35",
-    "@colyseus/uwebsockets-transport": "^0.18.35"
+    "colyseus": "^0.16.5",
+    "@colyseus/uwebsockets-transport": "^0.16.9"
   },
   "engines": {
     "node": "20.x"
   }
 }
+
